@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">	
+	<title>Search</title>
+	<meta name="description" content="">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<link href="http://netdna.bootstrapcdn.com/bootstrap/3.0.3/css/bootstrap.min.css" rel="stylesheet" media="all">
+	<style>
+	#img { display: none; }
+	h2 { opacity: 0 }
+	</style>
+	<link href="css/jquery.Jcrop.min.css" rel="stylesheet" />
+</head>
+<body>
+	<div class="container">
+		
+		<div class="row">
+			
+			<div class="col-sm-12">
+				
+				<h1>Image Editor</h1>
+				
+				<form role="form">
+					
+					<select id="template" class="form-control">
+						<option>Select a Template</option>
+	                    <option data-coordinates='[0,0,100,100]' data-dimensions='[100,100]'>Generic Square</option>
+	                    <option data-coordinates='[0,0,180,180]' data-dimensions='[180,180]'>Facebook Profile Picture</option>
+	                    <option data-coordinates='[0,0,851,315]' data-dimensions='[851,315]'>Facebook Cover Photo</option>
+	                    <option data-coordinates='[0,0,81,81]' data-dimensions='[81,81]'>Twitter Profile Picture</option>
+	                    <option data-coordinates='[0,0,520,260]' data-dimensions='[520,260]'>Twitter Header Image</option>
+	                    <option data-coordinates='[0,0,84,84]' data-dimensions='[84,84]'>Google+ Profile Picture</option>
+	                    <option data-coordinates='[0,0,800,400]' data-dimensions='[800,400]'>Google+ Cover Photo</option>
+	                    <option data-coordinates='[0,0,200,200]' data-dimensions='[200,200]'>LinkedIn Profile Picture</option>
+	                    <option data-coordinates='[0,0,646,220]' data-dimensions='[646,220]'>LinkedIn Homepage Image</option>
+	                    <option data-coordinates='[0,0,100,60]' data-dimensions='[100,60]'>LinkedIn Company Logo</option>
+	                    <option data-coordinates='[0,0,160,165]' data-dimensions='[160,165]'>Pinterest Profile Image</option>
+					</select>
+					
+					<div class="form-group">
+    					<label for="image-upload">Upload image</label>
+						<input type="file" name="image upload" id="imageUpload" />
+						<span class="help-block" id="user-msg">Please upload an image</span>
+						<button type="button" class="btn btn-danger" id="delete" disabled>Delete</button>
+					</div> 
+				
+				</form>
+
+			</div> <!-- end col-sm-12 -->
+
+		</div> <!-- end row -->
+
+		<!-- image -->
+		<div class="row">
+			<div class="col-sm-12">
+				<h2>Your Image</h2>
+				<img src="" id="img" class="img-responsive" />
+			</div> <!-- end col-sm-12 -->
+		</div> <!-- end row -->
+		
+	</div><!-- end container -->
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+<!--[if lt IE 10]>
+		<script>
+			alert( "Sorry, your browser is too old to use this tool. Please upgrade to a newer version of Internet Explorer.");
+			$( '#imageUpload' ).attr( 'disabled', 'disabled' );
+		</script>
+	<![endif]-->
+<script src="js/jquery.Jcrop.min.js"></script>
+<script src="js/main.js"></script>
+</body>
+</html>
