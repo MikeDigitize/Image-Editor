@@ -39,11 +39,12 @@ $( input ).change( function() {
 		if( match === false ) {
 			userMsg( "Sorry, file type not supported." );
 		}
+		
 	}
 	
 });
 
-//	handles messages for user
+//	handles messages to user
 function userMsg( txt ) {
 	$( '#user-msg' ).text( txt );
 }
@@ -109,7 +110,7 @@ function showImg( res ) {
 
 	//	display image,
 	//	assign image properties as data attributes
-	//	and initialise crop tool
+	//	initialise crop tool with data
 	
 	$( '#img' ).attr( 'src', imgPath ).data( {
 		name : imgName,
@@ -126,7 +127,7 @@ function showImg( res ) {
 	});
 }
 
-//	delete button handler
+//	delete image button handler
 $( '#delete' ).click( function() {
 	var con = confirm( "Are you sure you want to delete the image?" );
 	if( con === true ) {
@@ -135,7 +136,7 @@ $( '#delete' ).click( function() {
 });
 
 //	send ajax call to server with path of image to delete
-//	re-init variables, inline CSS on image and UI buttons
+//	if data back is 1 (true) re-initialise the page
 function deleteImg() {	
 	$.post( "delete.php", { path: $( '#img' ).data( 'path' ) }, function( data ) {
 		if( data == 1 ) {
@@ -147,7 +148,9 @@ function deleteImg() {
 	});
 }
 
-//	delete file from server if user exits early
+//	send ajax request to delete file from server if user exits early
+//	settimeout will pause and if user chooses to stay on page will immediately
+//	fire and re-initialise the page
 window.onbeforeunload = function (e) {
 	if( imgFinished === false && fileUploaded === true ) {
 		var message = "Thanks for using this tool! Your image will now be deleted.",
@@ -164,6 +167,9 @@ window.onbeforeunload = function (e) {
 	}
 }
 
+
+//	kill the jcrop plugin to remove it from document
+//	re-init all the variables
 function reinitPage() {
 	jCropAPI.destroy();
 	fileUploaded = false;

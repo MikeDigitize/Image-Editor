@@ -36,12 +36,12 @@
 		$size = getimagesize( $_FILES[ 'image' ][ 'tmp_name' ] );
 
 		//	test if image is too small - 81px x 81px is smallest template
-		//	or too large - 1920 x 1080 is max
+		//	or too large
 
 		if( $size[0] < 80 || $size[1] < 80 ){
 			exit( json_encode( "Sorry, your image is too small for this tool." ) );
 		}
-		else if( $size[0] > 2100 || $size[1] > 1200 ) {
+		else if( $size[0] > 2100 || $size[1] > 2100 ) {
 			exit( json_encode( "Sorry, your image is too big for this tool." ) );
 		}
 
@@ -69,19 +69,19 @@
 		//	if file is a png 
 		if( $type[1] === "png" ) {
 			$image = imagecreatefrompng( $_FILES[ 'image' ][ 'tmp_name' ] );
-			convertAndSave( $image );
+			convertAndSave( $image, $size, $type[1] );
 				
 		}
 		//	if file is a gif
 		else if ( $type[1] === "gif" ) {
 			$image = imagecreatefromgif( $_FILES[ 'image' ][ 'tmp_name' ] );
-			convertAndSave( $image );
+			convertAndSave( $image, $size, $type[1] );
 		}
 		//	if file is already a jpeg / jpg
 		else {
 			if( move_uploaded_file ( $_FILES[ 'image' ][ 'tmp_name' ], "temp/" . $_FILES[ 'image' ][ 'name' ] ) === true ) {
 				$filename = explode( ".", $_FILES[ 'image' ][ 'name' ] );
-				success( $filename[0] );
+				success( $filename[0], $size, $type[1] );
 			}
 			else {
   				failure();
@@ -91,7 +91,7 @@
 
 
   	//	convert gif or png to jpeg
-  	function convertAndSave( $image ) {
+  	function convertAndSave( $image, $size, $type ) {
 
   		$bg = imagecreatetruecolor( imagesx( $image ), imagesy( $image ) );
 		imagefill( $bg, 0, 0, imagecolorallocate( $bg, 255, 255, 255 ) );
@@ -105,7 +105,7 @@
 
 		if( imagejpeg( $bg, "temp/" . $filename[0] . ".jpeg", 100 ) === true ) {
 			ImageDestroy( $bg );
-			success( $filename[0] );				
+			success( $filename[0], $size, $type );				
 		}
 		else {
 			failure();
@@ -114,13 +114,13 @@
 
 
   	//	send image details to browser
-  	function success( $name ) {
+  	function success( $name, $size, $type ) {
   		exit(json_encode( array( "temp/" . $name . ".jpeg", 
 			$name . ".jpeg", 
 			$size[0], 
 			$size[1], 
 			round( $_FILES[ 'image' ][ 'size' ] / 1024 ), 
-			'jpeg' ) 
+			$type . " to jpeg." ) 
 		));
   	}	
 
