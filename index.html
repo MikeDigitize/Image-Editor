@@ -22,9 +22,9 @@
 				<h1>Image Editor</h1>
 				
 				<form role="form">
-					
+					<label for="template">Select a template</label>
 					<select id="template" class="form-control">
-						<option>Select a Template</option>
+						<option data-coordinates='[0,0,81,81]' data-dimensions='[81,81]'>No Template</option>
 	                    <option data-coordinates='[0,0,100,100]' data-dimensions='[100,100]'>Generic Square</option>
 	                    <option data-coordinates='[0,0,180,180]' data-dimensions='[180,180]'>Facebook Profile Picture</option>
 	                    <option data-coordinates='[0,0,851,315]' data-dimensions='[851,315]'>Facebook Cover Photo</option>
@@ -43,6 +43,7 @@
 						<input type="file" name="image upload" id="imageUpload" />
 						<span class="help-block" id="user-msg">Please upload an image</span>
 						<button type="button" class="btn btn-danger" id="delete" disabled>Delete</button>
+						<button type="button" class="btn btn-success" id="crop" disabled>Crop</button>
 					</div> 
 				
 				</form>

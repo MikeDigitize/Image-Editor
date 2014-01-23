@@ -37,7 +37,9 @@
 
 		//	test if image is too small - 81px x 81px is smallest template
 		//	or too large
+		//	test if $size variable exists to avoid errors
 
+		
 		if( $size[0] < 80 || $size[1] < 80 ){
 			exit( json_encode( "Sorry, your image is too small for this tool." ) );
 		}
@@ -50,14 +52,16 @@
 		//	for the chosen dimensions to be applied to
 
 		if ( isset( $_POST[ 'dimensions' ] ) ) {
-			$dimensions = $_POST[ 'dimensions' ];
+			$dimensions = $_POST[ 'dimensions' ];			
 			$dimensions = explode( ",", $dimensions );
 			
 			//	if image is too small for template, exit
 			if( $dimensions[0] > $size[0] || $dimensions[1] > $size[1] ) {
+				unset( $_POST[ 'dimensions' ] );
 				exit( json_encode( "Sorry, your image isn't large enough for that template." ) );
 			}
-		}
+		}		
+
 
 		//	validation ends
 		
