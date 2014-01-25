@@ -8,6 +8,7 @@
 	<link href="http://netdna.bootstrapcdn.com/bootstrap/3.0.3/css/bootstrap.min.css" rel="stylesheet" media="all">
 	<style>
 	#img { display: none; }
+	#loadingGif { display: none;; margin-left: 10px }
 	h2 { opacity: 0 }
 	</style>
 	<link href="css/jquery.Jcrop.min.css" rel="stylesheet" />
@@ -36,14 +37,17 @@
 	                    <option data-coordinates='[0,0,646,220]' data-dimensions='[646,220]'>LinkedIn Homepage Image</option>
 	                    <option data-coordinates='[0,0,100,60]' data-dimensions='[100,60]'>LinkedIn Company Logo</option>
 	                    <option data-coordinates='[0,0,160,165]' data-dimensions='[160,165]'>Pinterest Profile Image</option>
+	                    <option data-coordinates='[0,0,160,165]' data-dimensions='[160,165]'>Poop</option>
 					</select>
 					
 					<div class="form-group">
     					<label for="image-upload">Upload image</label>
+    					<img src="ajax-loader.gif" id="loadingGif" alt="Image is loading" />
 						<input type="file" name="image-upload" id="imageUpload" />
 						<span class="help-block" id="user-msg">Please upload an image</span>
 						<button type="button" class="btn btn-danger" id="delete" disabled>Delete</button>
-						<button type="button" class="btn btn-success" id="crop" disabled>Crop</button>
+						<button type="button" class="btn btn-primary" id="crop" disabled>Crop</button>
+						<button type="button" class="btn btn-success" id="download" disabled>Downlaod</button>
 					</div> 
 				
 				</form>

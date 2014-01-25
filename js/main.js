@@ -4,7 +4,7 @@
 	var input = $( "#imageUpload" ),
 		formdata = new FormData(),
 		fileUploaded = false,
-		imgFinished = false,
+		readyToDownload = false,
 		imgPath,
 		imgName,
 		imgWidth,
@@ -38,7 +38,6 @@
 				for( var i = 0, l = types.length; i < l; i++ ) {
 					if( type === types[i] ) {
 						match = true;
-						uploadImg( this.files[0] );
 					}
 				}
 
@@ -48,8 +47,13 @@
 				}
 
 				// if file size is greater than 1mb, reject
-				if( size > 1024 ) {
+				else if( size > 1024 ) {
 					userMsg( "Sorry, file too big." );
+				}
+
+				//	upload image
+				else {
+					uploadImg( this.files[0] );
 				}
 				
 			}
@@ -73,6 +77,8 @@
 
 		// append dimensions to form data and store index of selected option
 		formdata.append( "dimensions", $( '#template option:selected' ).data( 'dimensions' ) );
+		$( '#loadingGif' ).show( 300 );
+		userMsg( 'Image uploading, please wait...' );
 		
 		// upload image
 		$.ajax({
@@ -82,11 +88,13 @@
 			processData: false,
 			contentType: false,
 			success: function ( res ) {
+				$( '#loadingGif' ).hide( 300 );
 				var result = JSON.parse( res );
 
 				// if result is a string it's an error message
 				// if not, result is an array so grab contents (the image details)
 				if( typeof result === "string" ) {
+					
 					userMsg( result );
 				}
 				else {
@@ -155,10 +163,10 @@
 			jCropAPI = this;
 		});
 		$( '#delete' ).removeAttr( 'disabled' );
-		$( '#crop' ).removeAttr( 'disabled' );
-		$( input ).attr( 'disabled', 'disabled' );
+		$( '#crop' ).removeAttr( 'disabled' );	
 		$( '#template' ).attr( 'disabled', 'disabled' );
-		$( 'h2' ).animate( { opacity : 1 }, 300 );		
+		$( 'h2' ).animate( { opacity : 1 }, 300 );	
+		input.attr( 'disabled', 'disabled' );	
 		userMsg( "Image successfully uploaded." );
 	}
 
@@ -169,33 +177,13 @@
 	$( '#delete' ).click( function() {
 		var con = confirm( "Are you sure you want to delete the image?" );
 		if( con === true ) {
-			$.post( "delete.php", { path: $( '#img' ).data( 'path' ) }, 
-				function( data ) {
-					if( data == 1 ) {
-						reinitPage();			
-					}
-					else {
-						userMsg( "Sorry, there seems to have been an error. Please try again." );
-					}
-			});
+			del();
+			reinitPage();
 		}	
 	});
 
-
-	// delete file from server if user refreshes / closes tab
-	window.onbeforeunload = function (e) {		
-		if( imgFinished === false && fileUploaded === true ) {
-			var message = "Thanks for using this tool! Your image will now be deleted.",
-		  		e = e || window.event;
-		  	if (e) {
-		  		$.post( "delete.php", { path: $( '#img' ).data( 'path' ) } );
-		  		setTimeout( function() {
-		  			reinitPage();
-		  		}, 300 );
-		    	e.returnValue = message;
-		  	}
-		  	return message;
-		}
+	function del() {
+		$.post( "delete.php", { path: $( '#img' ).data( 'path' ) } ); 
 	}
 
 
@@ -204,14 +192,16 @@
 	function reinitPage() {		
 		jCropAPI.destroy();
 		fileUploaded = false;
+		readyToDownload = false;
 		$( 'h2' ).animate( { opacity : 0 }, 300 );
 		$( '#img' ).fadeOut( 300, function() {
 			$( this ).removeAttr( 'src' ).css( { height: '', width: '' });
 		});
 		$( '#delete' ).attr( 'disabled', 'disabled' );
 		$( '#crop' ).attr( 'disabled', 'disabled' );
-		$( input ).removeAttr( 'disabled' );
+		$( '#download' ).attr( 'disabled', 'disabled' );
 		$( '#template' ).removeAttr( 'disabled' );
+		input.removeAttr( 'disabled' ).replaceWith( input = input.val('').clone( true ) );
 		userMsg( "Image successfully deleted." );
 	}
 
@@ -242,7 +232,9 @@
 		else {
 			dimensions = $( '#template option:eq(' + selectedTemplateIndex + ')' ).data( 'dimensions' );
 		}
-		
+		$( '#loadingGif' ).show( 300 );
+		userMsg( 'Processing image, please wait...' );
+
 		// send details of crop to server to resize
 		$.post( "resize.php", { 			
 			path: img.data( 'path' ), 
@@ -257,13 +249,17 @@
 			currentHeight : img.height() 
 		}, 
 		function( res ) {
-
+			
 			// get response from server, remove jcrop from image, reset image css 
 			// update image source to display newly cropped image (add date so browser forced not to used cached image) 
 			// add image details as data attributes
+			$( '#loadingGif' ).hide( 300 );
+			userMsg( 'Image crop successful.' );
 			var result = JSON.parse( res );
 			jCropAPI.destroy();
 			$( '#delete' ).removeAttr( 'disabled' );
+			$( '#download' ).removeAttr( 'disabled' );
+			readyToDownload = true;
 			$( '#img' ).fadeOut( 300, function() {
 				var d = new Date();
 				$( this ).attr( 'src', '' ).css( { height: '', width: '' }).attr( 'src', result[0] + '?' + d.getTime() ).data( {
@@ -274,6 +270,33 @@
 			});	
 		});	
 	});
+
+	
+	// download 
+	$( "#download" ).click( function (e) {		
+		window.location = "download.php?img=" + $( '#img' ).data( 'path' );
+		setTimeout( function(){
+			del();
+			reinitPage();
+		}, 1000 );							
+	});
+
+
+	// delete file from server if user refreshes / closes tab
+	window.onbeforeunload = function (e) {		
+		if( fileUploaded === true && readyToDownload === false ) {
+			var message = "Thanks for using this tool! Your image will now be deleted.",
+		  		e = e || window.event;
+		  	if (e) {
+		  		del();
+		  		setTimeout( function() {
+		  			reinitPage();
+		  		}, 300 );
+		    	e.returnValue = message;
+		  	}
+		  	return message;
+		}
+	}
 
 })();
 
