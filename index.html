@@ -4,12 +4,13 @@
 	<meta charset="utf-8">	
 	<title>Image Cropper</title>
 	<meta name="description" content="">
-	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<link href="http://netdna.bootstrapcdn.com/bootstrap/3.0.3/css/bootstrap.min.css" rel="stylesheet" media="all">
 	<style>
-	#img { display: none; }
+	#img, #filterOptions { display: none; }
 	#loadingGif { display: none;; margin-left: 10px }
 	h2 { opacity: 0 }
+	select, .btn { margin-bottom: 10px}
+	input[type="range"]{ float: left; margin-right: 20px; }
 	</style>
 	<link href="css/jquery.Jcrop.min.css" rel="stylesheet" />
 </head>
@@ -24,7 +25,7 @@
 				
 				<form role="form">
 					<label for="template">Select a template</label>
-					<select id="template" class="form-control">
+					<select id="template" name="template" class="form-control">
 						<option data-coordinates='[0,0,81,81]' data-dimensions='[81,81]'>No Template</option>
 	                    <option data-coordinates='[0,0,100,100]' data-dimensions='[100,100]'>Generic Square</option>
 	                    <option data-coordinates='[0,0,180,180]' data-dimensions='[180,180]'>Facebook Profile Picture</option>
@@ -37,7 +38,6 @@
 	                    <option data-coordinates='[0,0,646,220]' data-dimensions='[646,220]'>LinkedIn Homepage Image</option>
 	                    <option data-coordinates='[0,0,100,60]' data-dimensions='[100,60]'>LinkedIn Company Logo</option>
 	                    <option data-coordinates='[0,0,160,165]' data-dimensions='[160,165]'>Pinterest Profile Image</option>
-	                    <option data-coordinates='[0,0,160,165]' data-dimensions='[160,165]'>Poop</option>
 					</select>
 					
 					<div class="form-group">
@@ -56,9 +56,39 @@
 
 		</div> <!-- end row -->
 
-		<!-- image -->
 		<div class="row">
 			<div class="col-sm-12">
+				<div class="form-group" id="filterOptions">
+					<label for="filter-select">Filter Select</label>
+					<select id="filterSelect" name="filter-select" class="form-control">
+						<option data-class="filter-blur" data-pb="pb-blur-amount" data-range="1">Blur</option>
+	                    <option data-class="filter-emboss" data-pb="pb-emboss-amount" data-range="1">Emboss</option>
+	                    <!-- <option data-class="filter-edges" data-pb="pb-edges-amount" data-range="1">Enhance Edges</option> -->
+	                    <option data-class="filter-greyscale" data-pb="pb-greyscale-opacity" data-range="100">Greyscale</option>
+	                    <option data-class="filter-mosaic" data-pb="pb-mosaic-opacity" data-range="100">Mosaic</option>
+	                    <option data-class="filter-noise" data-pb="pb-noise-amount" data-range="100">Noise</option>
+	                    <option data-class="filter-posterize" data-pb="pb-posterize-amount" data-range="255">Posterize</option>
+	                    <option data-class="filter-sepia" data-pb="pb-sepia-opacity" data-range="100">Sepia</option>
+	                    <option data-class="filter-sharpen" data-pb="pb-sharpen-amount" data-range="100">Sharpen</option>
+	                    <option data-class="filter-tint" data-pb="pb-tint-opacity" data-range="100">Tint</option> -->
+					</select>
+					<div class="row">				
+						<div class="col-sm-12">
+							<div class="row" id="filterControls">
+								<div class="col-md-4 col-xs-6">
+									<label id="filterLabel">Blur </label><span id="filterAmount" data-filter="pb-blur-amount">: 0</span>
+									<input id="filterSlider" type="range" data-filter="pb-blur-amount" value="0" min="0" max="1" step="0.1" />					
+								</div>
+							</div>
+						</div>
+					</div>
+				</div> 
+			</div>
+		</div>
+
+		<!-- image -->
+		<div class="row">
+			<div class="col-sm-12" id="imgHolder">
 				<h2>Your Image</h2>
 				<img src="" id="img" class="img-responsive" />
 			</div> <!-- end col-sm-12 -->
@@ -75,5 +105,6 @@
 	<![endif]-->
 <script src="js/jquery.Jcrop.min.js"></script>
 <script src="js/main.js"></script>
+<script src="js/paintbrush.js"></script>
 </body>
 </html>

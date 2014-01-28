@@ -188,14 +188,21 @@
 
 
 	// kill the jcrop plugin to remove it
-	// re-init variables
+	// re-init variables and filter options
 	function reinitPage() {		
 		jCropAPI.destroy();
+		removeImgClasses();
 		fileUploaded = false;
 		readyToDownload = false;
+		$( '#filterOptions' ).hide( 300 );
+		var opt = $( '#filterSelect option' ).get( 0 );
+		$( opt ).attr( 'selected', 'selected' );
+		$( '#filterLabel' ).text( 'Blur' );
+		$( '#filterSlider' ).data( 'filter', 'pb-blur-amount' ).val( 0 );
+		$( '#filterAmount' ).data( 'filter', 'pb-blur-amount' ).text( ': 0' );
 		$( 'h2' ).animate( { opacity : 0 }, 300 );
 		$( '#img' ).fadeOut( 300, function() {
-			$( this ).removeAttr( 'src' ).css( { height: '', width: '' });
+			$( this ).removeAttr( 'src' ).css( { height: '', width: '' }).removeData();
 		});
 		$( '#delete' ).attr( 'disabled', 'disabled' );
 		$( '#crop' ).attr( 'disabled', 'disabled' );
@@ -253,27 +260,29 @@
 			// get response from server, remove jcrop from image, reset image css 
 			// update image source to display newly cropped image (add date so browser forced not to used cached image) 
 			// add image details as data attributes
-			$( '#loadingGif' ).hide( 300 );
-			userMsg( 'Image crop successful.' );
-			var result = JSON.parse( res );
-			jCropAPI.destroy();
-			$( '#delete' ).removeAttr( 'disabled' );
-			$( '#download' ).removeAttr( 'disabled' );
-			readyToDownload = true;
-			$( '#img' ).fadeOut( 300, function() {
-				var d = new Date();
-				$( this ).attr( 'src', '' ).css( { height: '', width: '' }).attr( 'src', result[0] + '?' + d.getTime() ).data( {
-					width : result[1],
-					height : result[2],
-					size : result[3],
-				}).fadeIn( 300 );
-			});	
+			$( '#filterOptions' ).show( 300, function() {
+				$( '#loadingGif' ).hide( 300 );
+				userMsg( 'Image crop successful.' );
+				var result = JSON.parse( res );
+				jCropAPI.destroy();
+				$( '#delete' ).removeAttr( 'disabled' );
+				$( '#download' ).removeAttr( 'disabled' );
+				$( '#img' ).fadeOut( 300, function() {
+					var d = new Date();
+					$( this ).attr( 'src', '' ).css( { height: '', width: '' }).attr( 'src', result[0] + '?' + d.getTime() ).data( {
+						width : result[1],
+						height : result[2],
+						size : result[3],
+					}).fadeIn( 300 );
+				});	
+			});			
 		});	
 	});
 
 	
-	// download 
+	// download image
 	$( "#download" ).click( function (e) {		
+		readyToDownload = true;
 		window.location = "download.php?img=" + $( '#img' ).data( 'path' );
 		setTimeout( function(){
 			del();
@@ -282,12 +291,101 @@
 	});
 
 
+	// filter drop down menu
+	// add chosen filter type as a data attribute to the range input 
+	// set the value of the range from the value stored in the image's data attribute
+	// update label with current chosen filter name
+	// update filter amount with filter data attribute & value from image
+	$( '#filterSelect' ).change( function() {
+		var option = $( '#filterSelect option:selected' ), img = $( '#img' ), pbAmt;
+		if( img.data( option.data( 'pb' ) ) === undefined ) {
+			pbAmt = 0;
+		}
+		else {
+			pbAmt = img.data( option.data( 'pb' ) );
+		}
+		$( '#filterSlider' ).data( 'filter', option.data( 'pb' ) ).val( pbAmt );
+		$( '#filterLabel' ).text( option.val() );
+		$( '#filterAmount' ).data( 'filter', option.data( 'pb' ) ).text( ': ' + pbAmt );
+	});
+
+
+	// create array of classes
+	// run through each class and remove all ones beginning with 'filter' or 'pb'
+	function removeImgClasses() {
+		var classes = $( '#img' ).attr( 'class' ).split( /\s+/);
+		$.each( classes, function( index, item ) {
+		    if ( item.indexOf( 'filter' ) !== -1 || item.indexOf( 'pb' ) !== -1 ) {
+		       $( '#img' ).removeClass( item );
+		    }
+		});
+	}
+
+	// add filter to image 	
+	$( '#filterSlider' ).mouseup( function() {	
+
+		// update UI with filter amount and add filter data attribute to image	
+		$( '#filterAmount' ).text( ': ' + $( this ).val() );
+		$( '#img' ).data( $( this ).data( 'filter' ), $( this ).val() );
+		removeImgClasses();
+
+		// run through each data attribute on image
+		// find attributes that begin with pb
+		// test values of these data attributes
+		// if value is 0 remove data attribute 
+		// if value is greater than 0 add the relevant filter class (get it from select menu with same data attribute)
+		var d = $( '#img' ).data();
+		var data = Object.keys( d );
+		$.each( data, function( index, item ) {
+		    if ( item.indexOf( 'pb' ) !== -1 ) {
+		        if( $( '#img' ).data( item ) == 0 ) {
+		       		$( '#img' ).removeData( item );
+		        }
+		       	else {
+
+		       		// jQuery removes hyphens from data attr names and replaces with capital letter
+		       		// loop through the data name and replace capital letters
+		       		// then find select option with same data attr and get the filter class
+		       		// to add to image
+		       		var r = item.match( /[A-Z]/g ), a = item, i = 0;
+		       		for( ; i < r.length; i++ ) {
+		       			a = a.replace( r[i], '-' + r[i].toLowerCase() );
+		       		}		       		
+		       		var option = $( '#filterSelect option[data-pb="' + a + '"]' );
+		       		$( '#img' ).addClass( option.data( 'class' ) );
+		       	}
+		    }
+		});
+		
+		// grab all image attributes (classes and data)
+		var classes = $( '#img' ).attr( 'class' ).split( /\s+/);
+		data = $( '#img' ).data();
+		
+		// create new image and add attributes
+		var img = $( '<img/>' ), i = 0, d = new Date();
+		img.attr( 'id', 'img' ).attr( 'src', data.path + '?' + d.getTime() ).data( data ).css( 'visibility', 'visible' );
+		for( ; i < classes.length; i++ ) {
+			img.addClass( classes[i] );
+		}
+
+		// delete the current image, append it to DOM, add filters
+		$( '#img' ).hide( 300, function() {
+			$( this ).remove();
+			$( '#imgHolder' ).append( img );
+			$( '#img' ).show( 300, function() {
+				processFilters();
+			});
+		})		
+	});
+
+
 	// delete file from server if user refreshes / closes tab
+	// readyToDownload prevents this from firing when the image is being downloaded via GET
 	window.onbeforeunload = function (e) {		
 		if( fileUploaded === true && readyToDownload === false ) {
 			var message = "Thanks for using this tool! Your image will now be deleted.",
 		  		e = e || window.event;
-		  	if (e) {
+		  	if ( e ) {
 		  		del();
 		  		setTimeout( function() {
 		  			reinitPage();

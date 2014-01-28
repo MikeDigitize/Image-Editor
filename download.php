@@ -16,6 +16,8 @@
 			header( 'Content-Length: ' . filesize( $image ) );
 			ob_clean();
 			flush();
+
+			//	download image
 			readfile( $image );
 			exit;
 		}
