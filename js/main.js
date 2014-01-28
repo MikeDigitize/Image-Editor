@@ -1,4 +1,4 @@
-( function() {
+(function() {
 	
 	// variables
 	var input = $( "#imageUpload" ),
@@ -182,8 +182,16 @@
 		}	
 	});
 
+
+	// delete image from server
+	// test if a png has been created and if so send that path to delete too
 	function del() {
-		$.post( "delete.php", { path: $( '#img' ).data( 'path' ) } ); 
+		if( $( '#img' ).data( 'pngPath' ) !== undefined ) {
+			$.post( "delete.php", { path: $( '#img' ).data( 'path' ), pngPath : $( '#img' ).data( 'pngPath' ) } ); 
+		}
+		else {
+			$.post( "delete.php", { path: $( '#img' ).data( 'path' ) } ); 
+		}
 	}
 
 
@@ -195,8 +203,7 @@
 		fileUploaded = false;
 		readyToDownload = false;
 		$( '#filterOptions' ).hide( 300 );
-		var opt = $( '#filterSelect option' ).get( 0 );
-		$( opt ).attr( 'selected', 'selected' );
+		$( '#filterSelect option:eq(0)' ).attr( 'selected', 'selected' );
 		$( '#filterLabel' ).text( 'Blur' );
 		$( '#filterSlider' ).data( 'filter', 'pb-blur-amount' ).val( 0 );
 		$( '#filterAmount' ).data( 'filter', 'pb-blur-amount' ).text( ': 0' );
@@ -281,13 +288,29 @@
 
 	
 	// download image
+	// test if image is a png (i.e. filters applied)
+	// if so create png and then download
 	$( "#download" ).click( function (e) {		
 		readyToDownload = true;
-		window.location = "download.php?img=" + $( '#img' ).data( 'path' );
+		if( getImgType() === 'png' ) {
+			var img = $( '#img' );
+			var name = img.data( 'name' );
+			var index = name.indexOf( '.' );
+			name = name.substr( 0, index ) + '.png'; 
+			
+			// create png on server
+			$.post( "createPng.php", { img: name, png : img.attr( 'src' ) }, function( res ) {
+				$( '#img' ).data( 'pngPath', 'temp/' + name );
+				window.location = "download.php?img=" + $( '#img' ).data( 'pngPath' );
+			}); 
+		}
+		else {
+			window.location = "download.php?img=" + $( '#img' ).data( 'path' );
+		}							
 		setTimeout( function(){
 			del();
 			reinitPage();
-		}, 1000 );							
+		}, 1000 );	
 	});
 
 
@@ -327,6 +350,7 @@
 		// update UI with filter amount and add filter data attribute to image	
 		$( '#filterAmount' ).text( ': ' + $( this ).val() );
 		$( '#img' ).data( $( this ).data( 'filter' ), $( this ).val() );
+		userMsg( "Processing image, please wait..." );
 		removeImgClasses();
 
 		// run through each data attribute on image
@@ -374,9 +398,24 @@
 			$( '#imgHolder' ).append( img );
 			$( '#img' ).show( 300, function() {
 				processFilters();
+				userMsg( "Filters applied." );
 			});
-		})		
+		});	
 	});
+
+
+	// returns image type
+	// if png filters have been applied
+	// determines which image user downloads
+	function getImgType() {
+		var src = $('#img').attr('src'); 
+		if( src.indexOf( 'data' ) !== -1 ) { 
+			return 'png'; 
+		} 
+		else { 
+			return 'jpeg'; 
+		}
+	}
 
 
 	// delete file from server if user refreshes / closes tab
