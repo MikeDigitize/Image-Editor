@@ -215,6 +215,7 @@
 		$( '#crop' ).attr( 'disabled', 'disabled' );
 		$( '#download' ).attr( 'disabled', 'disabled' );
 		$( '#template' ).removeAttr( 'disabled' );
+		$( 'img:not(#img)' ).not( '#loadingGif' ).remove();
 		input.removeAttr( 'disabled' ).replaceWith( input = input.val('').clone( true ) );
 		userMsg( "Image successfully deleted." );
 	}
@@ -343,6 +344,7 @@
 		    }
 		});
 	}
+
 
 	// add filter to image 	
 	$( '#filterSlider' ).mouseup( function() {	
